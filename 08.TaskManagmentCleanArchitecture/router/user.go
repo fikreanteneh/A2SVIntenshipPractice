@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewUserRouter(timeout time.Duration, db mongo.Database, group *gin.RouterGroup) {
+func NewUserRouter(timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
 	userRepository := repository.NewUserRepository(db, "user")
 	userUseCase := usecase.NewUserUseCase(userRepository, timeout)
 	userController := controller.NewUserController(userUseCase)

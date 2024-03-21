@@ -32,6 +32,28 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
             c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
             return
         }
+        
+        // Extract claims from token
+        claims, ok := token.Claims.(jwt.MapClaims)
+        print(claims)
+        if !ok {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+            return
+        }
+
+        // Set user ID and username in the Gin context
+        userID, ok := claims["id"].(string)
+        if !ok {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
+            return
+        }
+        username, ok := claims["username"].(string)
+        if !ok {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Username not found in token"})
+            return
+        }
+        c.Set("userID", userID)
+        c.Set("username", username)
 
         c.Next()
     }

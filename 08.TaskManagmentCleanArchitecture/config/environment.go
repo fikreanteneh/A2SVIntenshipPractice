@@ -10,12 +10,13 @@ import (
 
 type Environment struct {
 	DatabaseURL string
+	DatabaseName string
 	JwtSecret   string
 	JwtExpiration int
 	Port string
 }
 
-func Load() *Environment{
+func Load() (*Environment, error){
 	// Load the environment variables
 	err := godotenv.Load()
 	if err != nil {
@@ -28,6 +29,7 @@ func Load() *Environment{
 		JwtSecret: os.Getenv("JWT_SECRET"),
 		JwtExpiration: jwtExpiration,
 		Port: os.Getenv("PORT"),
-	}
+		DatabaseName: os.Getenv("DATABASE_NAME"),
+	}, err
 
 }

@@ -1,13 +1,17 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"TaskManger/config"
+	"TaskManger/router"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
 	r := gin.Default()
-	err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
-
-
+    env, _ := config.Load()
+    db , _ := config.GetMongoClient(env.DatabaseURL, env.DatabaseName)
+    router.Setup(env, 10*time.Second, db, r)
+    r.Run("localhost:" + env.Port)
 }
