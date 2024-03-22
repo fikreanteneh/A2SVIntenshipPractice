@@ -1,6 +1,7 @@
 package router
 
 import (
+	"TaskManger/config"
 	"TaskManger/controller"
 	"TaskManger/repository"
 	"TaskManger/usecase"
@@ -10,9 +11,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewAuthRouter(timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
+func NewAuthRouter(environment *config.Environment, timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
 	userRepository := repository.NewUserRepository(db, "user")
-	userUseCase := usecase.NewUserUseCase(userRepository, timeout)
+	userUseCase := usecase.NewUserUseCase(userRepository, environment, timeout)
 	userController := controller.NewUserController(userUseCase)
 	group.POST("/register", userController.Register)
 	group.POST("/login", userController.Login)

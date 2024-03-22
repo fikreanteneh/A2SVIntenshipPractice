@@ -4,6 +4,7 @@ import (
 	"TaskManger/domain"
 	"TaskManger/middleware"
 	"TaskManger/models"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -74,6 +75,7 @@ func (t *TaskController) GetById(c *gin.Context) {
 		// TODO: Error Handling
 	// TODO: Authorization
 	taskId := c.Param("id")
+	fmt.Println("--------", taskId)
 	username, _ := c.Get("username")
 	task, err := t.taskUseCase.GetById(c, username.(string), taskId)
 	if err != nil {

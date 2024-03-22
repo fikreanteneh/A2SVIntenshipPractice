@@ -19,7 +19,7 @@ func Setup(env *config.Environment, timeout time.Duration, db *mongo.Database, g
 	taskRouter.Use(middleware.AuthMiddleware(env.JwtSecret))
 
 
-	NewAuthRouter(timeout, db, publicRouter)
-	NewUserRouter(timeout, db, userRouter)
-	NewTaskRouter(timeout, db, taskRouter)
+	NewAuthRouter(env, timeout, db, publicRouter)
+	NewUserRouter(env, timeout, db, userRouter)
+	NewTaskRouter(env, timeout, db, taskRouter)
 }

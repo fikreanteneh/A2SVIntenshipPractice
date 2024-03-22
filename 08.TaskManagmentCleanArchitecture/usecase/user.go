@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"TaskManger/config"
 	"TaskManger/domain"
 	"TaskManger/models"
 	"TaskManger/utils"
@@ -9,6 +10,7 @@ import (
 )
 
 type UserUseCase struct {
+	environment *config.Environment
 	UserRepository domain.UserRepository
 	contextTimeout time.Duration
 }
@@ -21,9 +23,8 @@ func (u *UserUseCase) Login(c context.Context, payload *models.UserCreate) (stri
 	if match != nil {
 		return "", err
 	}
-	token, err :=  utils.TokenGenerate(user.Id, user.Username, "fikremariam")
+	token, err :=  utils.TokenGenerate(user.Id, user.Username, u.environment.JwtSecret)
 	return token, err
-
 
 
 }
@@ -82,9 +83,10 @@ func (u *UserUseCase) UpdateUsername(c context.Context, userId string, payload *
 	return user, err
 }
 
-func NewUserUseCase(ur domain.UserRepository, timeout time.Duration) domain.UserUseCase {
+func NewUserUseCase(ur domain.UserRepository, env *config.Environment, timeout time.Duration) domain.UserUseCase {
 	return &UserUseCase{
 		UserRepository: ur,
+		environment: env,
 		contextTimeout: timeout,
 	}
 }

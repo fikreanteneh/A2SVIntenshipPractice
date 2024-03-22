@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"TaskManger/config"
 	"TaskManger/domain"
 	"TaskManger/models"
 	"context"
@@ -8,6 +9,7 @@ import (
 )
 
 type TaskUseCase struct {
+	environment *config.Environment
 	TaskRepository domain.TaskRepository
 	UserRepository domain.UserRepository
 	contextTimeout time.Duration
@@ -82,10 +84,11 @@ func (t *TaskUseCase) Update(c context.Context, username string, taskId string, 
 	return t.TaskRepository.Update(c, task)
 }
 
-func NewTaskUseCase(tr domain.TaskRepository, ur domain.UserRepository, timeout time.Duration) domain.TaskUseCase {
+func NewTaskUseCase(tr domain.TaskRepository, ur domain.UserRepository, env *config.Environment, timeout time.Duration) domain.TaskUseCase {
 	return &TaskUseCase{
 		TaskRepository: tr,
 		UserRepository: ur,
+		environment: env,
 		contextTimeout: timeout,
 	}
 }
