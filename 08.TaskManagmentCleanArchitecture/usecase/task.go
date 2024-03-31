@@ -5,6 +5,7 @@ import (
 	"TaskManger/domain"
 	"TaskManger/models"
 	"context"
+	"errors"
 	"time"
 )
 
@@ -15,11 +16,13 @@ type TaskUseCase struct {
 	contextTimeout time.Duration
 }
 
-// Create implements domain.TaskUseCase.
 func (t *TaskUseCase) Create(c context.Context, username string, payload *models.TaskCreate) (*domain.Task, error) {
 	user, err := t.UserRepository.GetByUsername(c, username)
-	if err != nil {
+	if err != nil || user == nil{
 		return nil, err
+	}
+	if payload.Status == nil || payload.Title == "" || payload.DueDate == nil || payload.Description == "" {
+		return nil, errors.New("Invalid Payload")
 	}
 	task := &domain.Task{
 		Title:       payload.Title,
@@ -33,14 +36,19 @@ func (t *TaskUseCase) Create(c context.Context, username string, payload *models
 
 // Delete implements domain.TaskUseCase.
 func (t *TaskUseCase) Delete(c context.Context, username string, taskId string) (*domain.Task, error) {
-	//TODO: Authorization Handling
-	_, err := t.UserRepository.GetByUsername(c, username)
+	user, err := t.UserRepository.GetByUsername(c, username)
 	if err != nil {
 		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("Unauthorized")
 	}
 	task, err := t.TaskRepository.GetById(c, taskId)
 	if err != nil {
 		return nil, err
+	}
+	if task.UserId != user.Id {
+		return nil, errors.New("Unauthorized")
 	}
 	return t.TaskRepository.Delete(c, task)
 	
@@ -48,34 +56,47 @@ func (t *TaskUseCase) Delete(c context.Context, username string, taskId string) 
 
 // GetById implements domain.TaskUseCase.
 func (t *TaskUseCase) GetById(c context.Context, username string, tasId string) (*domain.Task, error) {
-	//TODO: Authorization Handling
-	_, err := t.UserRepository.GetByUsername(c, username)
+	user, err := t.UserRepository.GetByUsername(c, username)
 	if err != nil {
 		return nil, err
 	}
-	return t.TaskRepository.GetById(c, tasId)
+	if user == nil {
+		return nil, errors.New("Unauthorized")
+	}
+	task, err := t.TaskRepository.GetById(c, tasId)
+	if task.UserId != user.Id {
+		return nil, errors.New("Unauthorized")
+	}
+	return task, nil
 }
 
 // GetByUsername implements domain.TaskUseCase.
 func (t *TaskUseCase) GetByUsername(c context.Context, username string) (*[]*domain.Task, error) {
-	//TODO	: Authorization Handling
 	user, err := t.UserRepository.GetByUsername(c, username)
 	if err != nil {
 		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("Unauthorized")
 	}
 	return t.TaskRepository.GetByUserId(c, user.Id)
 }
 
 // Update implements domain.TaskUseCase.
 func (t *TaskUseCase) Update(c context.Context, username string, taskId string, payload *models.TaskUpdate) (*domain.Task, error) {
-	//TODO: Authorization Handling
-	_, err := t.UserRepository.GetByUsername(c, username)
+	user, err := t.UserRepository.GetByUsername(c, username)
 	if err != nil {
 		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("Unauthorized")
 	}
 	task, err := t.TaskRepository.GetById(c, taskId)
 	if err != nil {
 		return nil, err
+	}
+	if task.UserId != user.Id {
+		return nil, errors.New("Unauthorized")
 	}
 	task.Title = payload.Title
 	task.Description = payload.Description

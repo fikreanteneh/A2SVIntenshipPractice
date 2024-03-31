@@ -55,7 +55,7 @@ func (u *UserController) Delete(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	deletedUser, err := u.userUseCase.Delete(c, user)
+	deletedUser, err := u.userUseCase.Delete(c, user.Id)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
