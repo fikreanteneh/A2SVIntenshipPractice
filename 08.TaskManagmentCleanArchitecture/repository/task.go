@@ -71,12 +71,10 @@ func (t *TaskRepository) GetByUserId(c context.Context, userId string) (*[]*doma
 func (t *TaskRepository) Update(c context.Context, task *domain.Task) (*domain.Task, error) {
 	    filter := bson.M{"_id": task.Id}
     update := bson.M{"$set": task}
-
     _, err := t.database.Collection(t.collection).UpdateOne(c, filter, update)
     if err != nil {
         return nil, err
     }
-
     return task, nil
 	
 }

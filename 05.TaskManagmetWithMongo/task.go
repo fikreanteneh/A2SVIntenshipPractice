@@ -1,46 +1,39 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 
 type Task struct {
-	id          primitive.ObjectID  `bson:"_id"`         `json:"_id,omitempty"`
-	Title       string              `bson:"title"`       `json:"title"`
-	Description string              `bson:"description"` `json:"description"`
-	DueDate     time.Time           `bson:"dueDate"`     `json:"dueDate"`
-	Status      bool                `bson:"status"`      `json:"status"`
+	id          string    `bson:"_id" json:"_id,omitempty"`
+	Title       string    `json:"title" bson:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"dueDate"`
+	Status      bool      `json:"status"`
 }
-
 
 type CreateTaskType struct {
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	DueDate     time.Time   `json:"dueDate"`
-	Status      bool        `json:"status"`
-
+    Title       string    `json:"title"`
+    Description string    `json:"description"`
+    DueDate     time.Time `json:"dueDate"`
+    Status      bool      `json:"status"`
 }
 
-var db = make(map[int]Task)
-var dbid = 1;
-client, err := GetMongoClient()
-collection := client.Database("taskmanager").Collection("task")
+var client, err = GetMongoClient()
+var collection = client.Database("taskmanager").Collection("task")
+
 
 func GetTask(context *gin.Context) {
 	var tasks []Task
-	if err != nil {
-		return context.JSON(400, "Failed to get tasks")
-	}
 	cursor, err := collection.Find(context, bson.M{})
 	if err != nil {
-		return context.JSON(400, "Failed to get tasks")
+		context.JSON(400, gin.H{"error": "Failed to get tasks"})
+		return
 	}
 	defer cursor.Close(context)
 	for cursor.Next(context) {
@@ -48,23 +41,18 @@ func GetTask(context *gin.Context) {
 		cursor.Decode(&task)
 		tasks = append(tasks, task)
 	}
-	return context.JSON(200, tasks)
+	context.JSON(200, gin.H{"response": tasks})
 }
 
 func GetTaskById(context *gin.Context) {
-	var id, err = strconv.Atoi(context.Param("id"))
-	var _, ok = db[id]
-	if err != nil || !ok {
-		context.JSON(400, gin.H{"error": "Invalid Id"})
-		return
-	}
+	var id = context.Param("id")
 	var task Task
 	err = collection.FindOne(context, bson.M{"_id": id}).Decode(&task)
 	if err != nil {
 		context.JSON(400, gin.H{"error": "Failed to get task"})
 		return
 	}
-	context.JSON(200, task)
+	context.JSON(200, gin.H{"response": task})
 }
 
 func CreateTask(context *gin.Context) {
@@ -73,12 +61,7 @@ func CreateTask(context *gin.Context) {
         context.JSON(400, gin.H{"error": "Invalid request"})
         return
     }
-
-	
-	var cursor, err = collection.InsertOne(context, bson.M{"title": task.title, "description": task.description, "status": task.status, "dueDate": task.dueDate})
-    if err != nil {
-        return context.JSON(400, gin.H{"error": "Failed to create task"})
-    }
+	var cursor, err = collection.InsertOne(context, bson.M{"title": task.Title, "description": task.Description, "status": task.Status, "dueDate": task.DueDate})
 	if err != nil {
 		context.JSON(400, gin.H{"error": "Failed to create task"})
 		return
@@ -88,7 +71,7 @@ func CreateTask(context *gin.Context) {
 
 
 func UpdateTask(context *gin.Context) {
-	var id, err = strconv.Atoi(context.Param("id"))
+	var id = context.Param("id")
 	if err != nil{
 		context.JSON(400, gin.H{"error": "Invalid Id"})
 		return
@@ -99,12 +82,12 @@ func UpdateTask(context *gin.Context) {
 		context.JSON(400, "Failed to update task")
 		return
 	}
-	updateResult, err := collection.UpdateOne(context, bson.M{"_id": id}, bson.M{"$set": bson.M{"title": task.title, "description": task.description, "status": task.status, "dueDate": task.dueDate}})
+	updateResult, err := collection.UpdateOne(context, bson.M{"_id": id}, bson.M{"$set": bson.M{"title": task.Title, "description": task.Description, "status": task.Status, "dueDate": task.DueDate}})
 	if err != nil {
 		context.JSON(500, gin.H{"error": "Failed to update task"})
 		return
 	}
-	context.JSON(200, gin.H{"result": updateResult, "message": "Successfully Updated Task"})
+	context.JSON(200, gin.H{"response": updateResult, "message": "Successfully Updated Task"})
 }
 
 func DeleteTask(context *gin.Context) {
@@ -122,5 +105,6 @@ func DeleteTask(context *gin.Context) {
 		context.JSON(500, gin.H{"error": "Failed to delete task"})
 		return
 	}
-	context.JSON(200, gin.H{"result", "Successfully deleted task"})
+	context.JSON(200, gin.H{
+		"reponse":deleteResult,"message": "Successfully deleted task"})
 }

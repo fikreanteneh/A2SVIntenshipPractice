@@ -21,7 +21,7 @@ type UserRepository interface {
 }
 
 type UserUseCase interface {
-	Create(c context.Context, payload *models.UserCreate) (*User, error)
+	Register(c context.Context, payload *models.UserCreate) (*User, error)
 	Login(c context.Context, payload *models.UserCreate) (string, error)
 	Delete(c context.Context, userId string) (*User, error)
 	UpdatePassword(c context.Context, userId string, payload *models.UserUpdatePassword) (*User, error)

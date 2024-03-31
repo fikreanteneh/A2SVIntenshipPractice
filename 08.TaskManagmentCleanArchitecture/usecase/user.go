@@ -29,8 +29,8 @@ func (u *UserUseCase) Login(c context.Context, payload *models.UserCreate) (stri
 
 }
 
-// Create implements domain.UserUseCase.
-func (u *UserUseCase) Create(c context.Context, payload *models.UserCreate) (*domain.User, error) {
+// Register implements domain.UserUseCase.
+func (u *UserUseCase) Register(c context.Context, payload *models.UserCreate) (*domain.User, error) {
 	hashedPassword, err := utils.EncryptPassword(payload.Password)
 	//TODO : Error Handling
 	user, err := u.UserRepository.Create(c, &domain.User{

@@ -29,7 +29,7 @@ func (u *UserController) Register(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	_, err := u.userUseCase.Create(c, &user)
+	_, err := u.userUseCase.Register(c, &user)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -49,7 +49,18 @@ func (u *UserController) Login(c *gin.Context) {
 }
 
 func (u *UserController) Delete(c *gin.Context) {
-
+	username, _ := c.Get("username")
+	user, err := u.userUseCase.GetByUsername(c, username.(string))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	deletedUser, err := u.userUseCase.Delete(c, user)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	middleware.SuccessResponseHandler(c, 200, "Task Deleted Successfully", deletedUser)
 }
 func (u *UserController) UpdateUsername(c *gin.Context) {
 
